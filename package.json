@@ -1,0 +1,23 @@
+{
+  "name": "commandlineemployeetracker",
+  "version": "1.0.0",
+  "description": "Create, review and manage employee records including items like department and role",
+  "main": "index.js",
+  "scripts": {
+    "test": "run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cormillionaire/CommandLineEmployeeTracker.git"
+  },
+  "author": "cormillionaire",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cormillionaire/CommandLineEmployeeTracker/issues"
+  },
+  "homepage": "https://github.com/cormillionaire/CommandLineEmployeeTracker#readme",
+  "dependencies": {
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3-rc.0"
+  }
+}
