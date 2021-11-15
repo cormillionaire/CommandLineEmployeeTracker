@@ -1,10 +1,5 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-const questions = require('./src/questions.js');
+const { mainMenu, addDepartment, addRole, addEmployee, getAllDepartments, getAllRoles, getAllEmployees } = require('./src/helper.js');
 
-
-inquirer
-  .prompt(questions)
-  .then((data) => {
-    console.log('Success!')
-  });
+mainMenu();

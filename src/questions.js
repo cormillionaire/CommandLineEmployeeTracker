@@ -1,13 +1,48 @@
-const initialPrompt = 
-[
-    {
-      type: 'list',
-      message: 'What would you like to do?',
-      name: 'action',
-      choices: ['view all departments', 'view all roles', 'view all employees','add a department', 'add a role', 'add an employee', 'update an employee role'],
-    },
-  ];
-  
-//
+const inquirer = require("inquirer");
 
-  module.exports = initialPrompt;
+const initialPrompt = [
+    {
+        type: 'list',
+        message: 'What would you like to do?',
+        name: 'action',
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role'],
+    },
+];
+
+const newDeptPrompt = [
+    {
+        type: 'list',
+        message: 'What would you like to do?',
+        name: 'action',
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role'],
+    },
+];
+
+const newRolePrompt = [
+    {
+        type: 'list',
+        message: 'What would you like to do?',
+        name: 'action',
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role'],
+    },
+];
+
+const newEmployeePrompt = [
+    {
+        type: 'list',
+        message: 'What would you like to do?',
+        name: 'action',
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role'],
+    },
+];
+
+const updateEmployeePrompt = [
+    {
+        type: 'list',
+        message: 'Who would you like to update?',
+        name: 'employee',
+        choices: [],
+    },
+];
+
+module.exports = { initialPrompt, newDeptPrompt, newRolePrompt, newEmployeePrompt, updateEmployeePrompt };
