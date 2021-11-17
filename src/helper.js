@@ -18,7 +18,7 @@ const db = mysql.createConnection(
 const mainMenu = async () => {
     inquirer.prompt(initialPrompt)
         .then((data) => {
-            
+
             const action = data.action;
             console.log(action);
             switch (action) {
@@ -50,9 +50,9 @@ const mainMenu = async () => {
                     break;
                 case 'Add a role':
                     addRole()
-                        .then((data) => {
-                        console.log(data.roleName + " added as new role");
-                        mainMenu();
+                        .then((newRoleTitle) => {
+                            console.log(newRoleTitle + " added as new role");
+                            mainMenu();
                         });
                     break;
                 case 'Add an employee':
@@ -176,27 +176,33 @@ const addDepartment = async () => {
 //add a role
 const addRole = async () => {
     return new Promise((resolve, reject) => {
-    newRolePrompt[2].choices = [];
-    getAllDepartments()
-        .then((data) => {
-            data.forEach(department => {
-                newRolePrompt[2].choices.push(department.name)
+        newRolePrompt[2].choices = [];
+        getAllDepartments()
+            .then((dataDep) => {
+                dataDep.forEach(department => {
+                    newRolePrompt[2].choices.push(department.name)
+                });
+                console.log("new log" + newRolePrompt[2].choices)
+                inquirer.prompt(newRolePrompt)
+                    .then((dataRole) => {
+                        const tableName = 'role';
+                        const newRoleTitle = dataRole.newRoleTitle;
+                        const newRoleSalary = dataRole.newRoleSalary;
+                        const newRoleDeptName = dataRole.newRoleDept;
+                        let newRoleDept = "";
+                        dataDep.forEach(department => {
+                            if (department.name === newRoleDeptName) {
+                                newRoleDept = department.id;
+                            }
+                        });
+                        db.query('INSERT INTO ?? (title, salary, department_id) VALUES (?,?,?)', [tableName, newRoleTitle, newRoleSalary, newRoleDept], function (err, results) {
+                            if (err) {
+                                reject(err);
+                            }
+                            resolve(newRoleTitle);
+                        });
+                    })
             });
-            console.log("new log" + newRolePrompt[2].choices)
-            inquirer.prompt(newRolePrompt)
-                .then((data) => {
-                    const tableName = 'role';
-                    const newRoleTitle = data.newRoleTitle;
-                    const newRoleSalary = data.newRoleSalary;
-                    const newRoleDept = data.newRoleDept;
-                    db.query('INSERT INTO ?? (title, salary, department_id) VALUES (?,?,?)', [tableName, newRoleTitle, newRoleSalary, newRoleDept], function (err, results) {
-                        if (err) {
-                            reject(err);
-                        }
-                        resolve(results);
-                    });
-                })
-        });
     });
 }
 //add an employee
