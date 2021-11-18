@@ -51,13 +51,13 @@ const newEmployeePrompt = [
         type: 'list',
         message: "What is the employee's role?",
         name: 'employeeRole',
-        choice: [] ,
+        choices: [] ,
     },
     {
         type: 'list',
         message: "What is the employee's manager?",
         name: 'employeeManager',
-        choice: [] ,
+        choices: [] ,
     },
 ];
 

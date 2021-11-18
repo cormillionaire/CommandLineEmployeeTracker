@@ -18,7 +18,6 @@ const db = mysql.createConnection(
 const mainMenu = async () => {
     inquirer.prompt(initialPrompt)
         .then((data) => {
-
             const action = data.action;
             console.log(action);
             switch (action) {
@@ -32,14 +31,18 @@ const mainMenu = async () => {
                     break;
                 case 'View all roles':
                     getAllRoles()
-                        .then(() =>
+                        .then((results) => {
+                            console.table(results);
                             mainMenu()
+                        }
                         );
                     break;
                 case 'View all employees':
                     getAllEmployees()
-                        .then(() =>
+                        .then((results) => {
+                            console.table(results);
                             mainMenu()
+                        }
                         );
                     break;
                 case 'Add a department':
@@ -57,15 +60,17 @@ const mainMenu = async () => {
                     break;
                 case 'Add an employee':
                     addEmployee()
-                        .then(() =>
+                        .then((newEmpFirstName) => {
+                            console.log(newEmpFirstName + " added as new employee");
                             mainMenu()
-                        );
+                        });
                     break;
                 case 'Update an employee role':
                     updateEmployeeRole()
-                        .then(() =>
+                        .then((updateEmpFirstName) => {
+                            console.log(updateEmpFirstName + " role was updated");
                             mainMenu()
-                        );
+                        });
                     break;
                 default:
                     console.log('Invalid Choice.Choose Valid Choice.');
@@ -98,7 +103,6 @@ const getAllRoles = async () => {
             if (err) {
                 reject(err);
             }
-            console.table(results);
             resolve(results);
         });
     });
@@ -121,7 +125,6 @@ const getAllEmployees = async () => {
                 if (err) {
                     reject(err);
                 }
-                console.table(results);
                 resolve(results);
             });
     });
@@ -130,26 +133,24 @@ const getAllEmployees = async () => {
 const getAllEmployeesNames = async () => {
     return new Promise((resolve, reject) => {
         const tableName = 'employee';
-        db.query(`SELECT CONCAT(CONCAT(employee.first_name,)employee.last_name) FROM ??`, tableName, function (err, results) {
+        db.query(`SELECT employee.id,CONCAT(CONCAT(employee.first_name, " "),employee.last_name) as employee_name FROM ??`, tableName, function (err, results) {
             if (err) {
                 reject(err);
             }
-            console.table(results);
             resolve(results);
         });
     });
 }
 
 //get managers
-const getManagers = async () => {
+const getAllManagers = async () => {
     return new Promise((resolve, reject) => {
         const tableName = 'employee';
         const managerRoleId = '1';
-        db.query('SELECT * FROM ?? WHERE role_id = ?', [tableName, managerRoleId], function (err, results) {
+        db.query('SELECT * FROM ?? WHERE role_id = 1', [tableName, managerRoleId], function (err, results) {
             if (err) {
                 reject(err);
             }
-            console.table(results);
             resolve(results);
         });
     });
@@ -206,34 +207,109 @@ const addRole = async () => {
     });
 }
 //add an employee
-const addEmployee = () => {
-    newEmployeePrompt[2].choice = getAllRoles();
-    inquirer.prompt(newEmployeePrompt)
-        .then((data) => {
-            const tableName = 'employee';
-            const newEmpFirstName = data.firstName;
-            const newEmpLastName = data.lastName;
-            const newEmpRole = data.employeeRole;
-            const newEmpManager = data.employeeManager;
-            db.query('INSERT INTO ?? (first_name, last_name, role_id, manager_id) VALUES (?,?,?)', [tableName, newEmpFirstName, newEmpLastName, newEmpRole, newEmpManager], function (err, results) {
-                console.log(results);
-            });
-        })
+const addEmployee = async () => {
+    return new Promise((resolve, reject) => {
+        newEmployeePrompt[2].choices = [];
+        new Promise((resolve, reject) => {
+            getAllRoles()
+                .then((dataEmpRole) => {
+                    dataEmpRole.forEach(role => {
+                        newEmployeePrompt[2].choices.push(role.title);
+                    });
+                    resolve(dataEmpRole);
+                });
+        }).then((dataEmpRole) => {
+            newEmployeePrompt[3].choices = ['None'];
+            getAllManagers()
+                .then((dataEmpManager) => {
+                    dataEmpManager.forEach(employee => {
+                        newEmployeePrompt[3].choices.push(employee.first_name + " " + employee.last_name);
+                    });
+                    inquirer.prompt(newEmployeePrompt)
+                        .then((dataEmp) => {
+                            const tableName = 'employee';
+                            const newEmpFirstName = dataEmp.firstName;
+                            const newEmpLastName = dataEmp.lastName;
+                            const newEmpRoleName = dataEmp.employeeRole;
+                            const newEmpManagerName = dataEmp.employeeManager;
+                            let newEmpManager = "";
+                            let newEmpRole = "";
+                            dataEmpManager.forEach(employee => {
+                                if (employee.first_name + " " + employee.last_name === newEmpManagerName) {
+                                    newEmpManager = employee.id;
+                                } else if (newEmpManagerName === "None"){
+                                    newEmpManager = null;
+                                }
+                            });
+                            dataEmpRole.forEach(role => {
+                                if (role.title === newEmpRoleName) {
+                                    newEmpRole = role.id;
+                                }
+                            });
+                            db.query('INSERT INTO ?? (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)', [tableName, newEmpFirstName, newEmpLastName, newEmpRole, newEmpManager], function (err, results) {
+                                if (err) {
+                                    reject(err);
+                                }
+                                console.log("im before resolve");
+                                resolve(newEmpFirstName);
+
+                            });
+                        });
+                });
+        });
+    });
 }
 
-const updateEmployeeRole = () => {
-    inquirer.prompt(updateEmployeePrompt)
-        .then((data) => {
-            const tableName = 'employee';
-            const updateEmpRole = data.employeeRole;
-            //get role id from role name
-
-            //insert change into table
-            db.query('INSERT INTO ?? (role_id) VALUES (?)', [tableName,], function (err, results) {
-                console.log(results);
+const updateEmployeeRole = async () => {
+    return new Promise((resolve, reject) => {
+        updateEmployeePrompt[0].choices = [];
+        new Promise((resolve, reject) => {
+            getAllEmployeesNames()
+                .then((dataEmpName) => {
+                    dataEmpName.forEach(employee => {
+                        updateEmployeePrompt[0].choices.push(employee.employee_name);
+                        resolve(dataEmpName);
+                    });
+                })
+        }).then((dataEmpName) => {
+            updateEmployeePrompt[1].choices = [];
+            new Promise((resolve, reject) => {
+            getAllRoles()
+                .then((dataEmpRole) => {
+                    dataEmpRole.forEach(role => {
+                        updateEmployeePrompt[1].choices.push(role.title);
+                        resolve(dataEmpRole);
+                    });
+                });
+            }).then ((dataEmpRole) => {
+            inquirer.prompt(updateEmployeePrompt)
+                .then((dataUpdateEmp) => {
+                    const tableName = 'employee';
+                    const updateEmpRoleName = dataUpdateEmp.employeeRole;
+                    let employeeId = "";
+                    dataEmpName.forEach(employee => {
+                        if (employee.employee_name === dataUpdateEmp.employeeList) {
+                            employeeId = employee.id;
+                        }
+                    });
+                    dataEmpRole.forEach(role => {
+                        if (role.title === dataUpdateEmp.employeeRole) {
+                            roleId = role.id;
+                        }
+                    });
+                    db.query('UPDATE ?? SET role_id = ? WHERE id = ?', [tableName, roleId, employeeId], function (err, results) {
+                        if (err) {
+                            reject(err);
+                        }
+                        console.log("Im before resolve");
+                        console.log(dataUpdateEmp.employeeList);
+                        resolve(dataUpdateEmp.employeeList);
+                    });
+                });
             });
-        })
+        });
+    });
 }
 
 //update an employee role
-module.exports = { mainMenu, getAllDepartments, getAllRoles, getAllEmployees, addDepartment, addRole, addEmployee, getManagers, getAllEmployeesNames, updateEmployeeRole };
+module.exports = { mainMenu, getAllDepartments, getAllRoles, getAllEmployees, addDepartment, addRole, addEmployee, getAllManagers, getAllEmployeesNames, updateEmployeeRole };
