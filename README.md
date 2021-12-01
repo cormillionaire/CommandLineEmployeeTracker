@@ -29,6 +29,8 @@ Future:
 * Application allows users to view the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department (8 points).
 
 ![EmployeeTracker.gif](./images/EmployeeTracker.gif)
+
+[Link to Video in Drive](https://drive.google.com/file/d/10MMN6oisy4y6zeyEto8vpUOuRztU2OdK/view)
 ## Tests
 run the application and verify expected behavior for each inquirer prompt
 ## Credits
